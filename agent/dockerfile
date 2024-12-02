@@ -1,0 +1,11 @@
+FROM python:3.9-slim
+
+WORKDIR /agent
+
+COPY requirements.txt /agent/
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . /agent/
+
+CMD ["python", "agent.py"]
