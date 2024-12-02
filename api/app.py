@@ -20,6 +20,17 @@ class ServerInfo(db.Model):
     users = db.Column(db.String(255))
     date = db.Column(db.String(10))
 
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "ip": self.ip,
+            "processor_info": self.processor_info,
+            "processes": self.processes,
+            "users": self.users,
+            "os_name": self.os_name,
+            "os_version": self.os_version
+        }
+
 
 
 @app.route('/collect_data', methods=['POST'])
@@ -50,21 +61,28 @@ def collect_data():
 
 @app.route('/get_server_info/<ip>', methods=['GET'])
 def get_server_info(ip):
-    server = ServerInfo.query.filter_by(ip_address=ip).first()
+    #server_info = ServerInfo.query.filter_by(ip_address=ip).first()
+    server_info = ServerInfo.query.filter_by(ip_address=ip).all()
     
-    if server:
-        return jsonify({
-            "ip": server.ip_address,
-            "processor": server.processor,
-            "os_name": server.os_name,
-            "os_version": server.os_version,
-            "users": server.users,
-            "date": server.date
-        }), 200
+    if server_info:
+        return jsonify([info.to_dict() for info in server_info]), 200
     else:
         return jsonify({"error": "Server not found"}), 404
+
+
+    #if server_info:
+        #return jsonify({
+            #"ip": server_info.ip_address,
+            #"processor": server_info.processor,
+            #"os_name": server_info.os_name,
+            #"os_version": server_info.os_version,
+            #"users": server_info.users,
+            #"date": server_info.date
+        #}), 200
+    #else:
+        #return jsonify({"error": "Server not found"}), 404
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000)
